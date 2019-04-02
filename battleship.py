@@ -61,7 +61,6 @@ def put_ship(specs, board, store_ship):
                         board[i][j] = ship_names[ship]
                     else:
                         raise ValueError('invalid placement')
-    print(store_ship)
 
     return board, store_ship
 
