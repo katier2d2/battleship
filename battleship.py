@@ -62,6 +62,7 @@ def put_ship(specs, board, store_ship):
                     else:
                         raise ValueError('invalid placement')
 
+    print('Placed {}'.format(ship))
     return board, store_ship
 
 def fire(loc, board):
@@ -72,27 +73,20 @@ def fire(loc, board):
     col = get_index(a)
 
     if not check_placement(board, row, col):
-        print('HIT')
+        print('Hit')
         store_hit(board, row, col)
+        # return board, False   ## test for game over
 
-    return board
+    else:
+        print('Miss')
 
+    return board, True
 
+game_on = True
 board = build_board()
 store_ship = {}
 
 print('PLACE SHIPS')
-
-# board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-# [1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-# [0, 9, 0, 0, 0, 0, 0, 0, 0, 0],
-# [0, 9, 3, 0, 0, 0, 0, 0, 0, 0],
-# [0, 9, 3, 0, 0, 0, 0, 0, 0, 0],
-# [0, 9, 3, 0, 0, 0, 0, 0, 0, 0],
-# [0, 9, 0, 0, 0, 0, 0, 0, 0, 0],
-# [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-# [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-# [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 
 for i in range(0, 2):
     place_ship = raw_input('') #PLACE_SHIP Destroyer right A1
@@ -107,12 +101,15 @@ for i in range(0, 2):
 # FIRE A4
 print('\nFIRE ON SHIPS')
 
-fire_loc = raw_input('')
-fire_loc = fire_loc.split(' ')
+while game_on == True:
+    fire_loc = raw_input('')
+    fire_loc = fire_loc.split(' ')
 
-if fire_loc.pop(0) == 'FIRE':
-    board = fire(fire_loc[0], board)
-else:
-    raise ValueError('invalid command, must start with "PLACE_SHIP"')
+    if fire_loc.pop(0) == 'FIRE':
+        board, game_on = fire(fire_loc[0], board)
+    else:
+        raise ValueError('invalid command, must start with "FIRE"')
 
-print_board(board)
+    # print_board(board)
+
+print('Game Over')
