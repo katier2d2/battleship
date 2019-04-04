@@ -1,115 +1,124 @@
-import os
-import sys
-import argparse
 
+class BattleShip:
 
+    def __init__(self, board):
+        self.board = board
+        self.store_ship = {}
 
+        self.ship_specs = {'Carrier': 5, 'Battleship': 4, 'Cruiser': 3, 'Submarine': 3, 'Destroyer': 2}
+        self.ship_names = {'Carrier': 9, 'Battleship': 8, 'Cruiser': 5, 'Submarine': 3, 'Destroyer': 1}
 
-def build_board():
-    board = []
+    def put_ship(self, specs):
+        ship = specs[0]
+        dir = specs[1]
+        row = int(specs[2][-1])
+        col = self.get_index(specs[2][0])
 
-    for i in range(0,10):
-        board.append([0 for x in range(0,10)])
-
-    return board
-
-def print_board(board):
-    for row in board:
-        print(row)
-
-def check_placement(board, row, col):
-    if not board[row][col] == 0:
-        return False
-    return True
-
-def get_index(a):
-    a_index = ['a','b','c','d','e','f','g','h','i','j']
-
-    return a_index.index(a.lower())
-
-
-def store_hit(board, row, col):
-    pass
-
-def put_ship(specs, board, store_ship):
-    ship = specs[0]  # Destroyer
-    dir = specs[1]   # right B3
-    a = specs[2][0]   # B
-    n = int(specs[2][-1])  # 3
-
-
-    ship_specs = {'Carrier': 5, 'Battleship': 4, 'Cruiser': 3, 'Submarine': 3, 'Destroyer': 2}
-    ship_names = {'Carrier': 9, 'Battleship': 8, 'Cruiser': 5, 'Submarine': 3, 'Destroyer': 1}
-
-    col = get_index(a)
-
-    for i,x in enumerate(board):
-        for j,a in enumerate(x):
-            if dir == 'right':
-                if i == n and (j in range(col, col + ship_specs[ship])):
-                    if check_placement(board, i,j):
-                        board[i][j] = ship_names[ship]
-                        if store_ship.get(ship, None) is None:
-                            store_ship[ship] = [i, j]
+        for i, x in enumerate(self.board):
+            for j, a in enumerate(x):
+                if dir == 'right':
+                    if i == row and (j in range(col, col + self.ship_specs[ship])):
+                        if self.check_placement(i, j):
+                            self.board[i][j] = self.ship_specs[ship]
+                            # store_ship = ship_store(self.ship, i, j)
                         else:
-                            store_ship[ship] = store_ship[ship].append([i, j])
-                    else:
-                        raise ValueError('invalid placement')
-            elif dir == 'down':
-                if j == col and (i in range(n, n + ship_specs[ship])):
-                    if check_placement(board, i,j):
-                        board[i][j] = ship_names[ship]
-                    else:
-                        raise ValueError('invalid placement')
+                            raise ValueError('invalid placement')
+                elif dir == 'down':
+                    if j == col and (i in range(row, row + self.ship_specs[ship])):
+                        if self.check_placement(i, j):
+                            self.board[i][j] = self.ship_names[ship]
+                        else:
+                            raise ValueError('invalid placement')
 
-    print('Placed {}'.format(ship))
-    return board, store_ship
+        print('Placed {}'.format(ship))
 
-def fire(loc, board):
-    a = loc[0]  # B
-    n = int(loc[-1])  # 3
+    def fire(self, location):
 
-    row = n
-    col = get_index(a)
+        row = int(location[-1])
+        col = self.get_index(location[0])
 
-    if not check_placement(board, row, col):
-        print('Hit')
-        store_hit(board, row, col)
-        # return board, False   ## test for game over
+        if not self.check_placement(row, col):
+            print('Hit')
+            self.store_hit()
+            # return board, False   ## test for game over
 
-    else:
-        print('Miss')
-
-    return board, True
-
-game_on = True
-board = build_board()
-store_ship = {}
-
-print('PLACE SHIPS')
-
-for i in range(0, 2):
-    place_ship = raw_input('') #PLACE_SHIP Destroyer right A1
+        else:
+            print('Miss')
 
 
-    place_ship = place_ship.split(' ')
-    if place_ship.pop(0) == 'PLACE_SHIP':
-        board, store_ship = put_ship(place_ship, board, store_ship)
-    else:
-        raise ValueError('invalid command, must start with "PLACE_SHIP"')
+    def store_hit(self):
+        pass
 
-# FIRE A4
-print('\nFIRE ON SHIPS')
+    def check_placement(self, row, col):
+        if not self.board[row][col] == 0:
+            return False
+        return True
 
-while game_on == True:
-    fire_loc = raw_input('')
-    fire_loc = fire_loc.split(' ')
+    def get_index(self, col):
+        col_index = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+        return col_index.index(col.lower())
 
-    if fire_loc.pop(0) == 'FIRE':
-        board, game_on = fire(fire_loc[0], board)
-    else:
-        raise ValueError('invalid command, must start with "FIRE"')
+    def ship_store(self, ship, row, col):
+        pass
 
-    # print_board(board)
+    def print_board(self):
+        for row in self.board:
+            print(row)
 
-print('Game Over')
+
+if __name__ == '__main__':
+
+    game_on = True
+
+    board = []
+    for i in range(0, 10):
+        board.append([0 for x in range(0, 10)])
+
+
+    battleship = BattleShip(board)
+
+    print('PLACE SHIPS')
+
+    for i in range(0, 1):
+        place_ship_input = raw_input('')  # PLACE_SHIP Destroyer right A1
+        place_ship_input = place_ship_input.split(' ')
+
+        if place_ship_input.pop(0) == 'PLACE_SHIP':
+            battleship.put_ship(place_ship_input)
+        else:
+            raise ValueError('invalid command, must start with "PLACE_SHIP"')
+
+        battleship.print_board()
+
+
+    # FIRE A4
+    print('\nFIRE ON SHIPS')
+
+    while game_on == True:
+        fire_loc = raw_input('')
+        fire_loc = fire_loc.split(' ')
+
+        if fire_loc.pop(0) == 'FIRE':
+            battleship.fire(fire_loc[0])
+        else:
+            raise ValueError('invalid command, must start with "FIRE"')
+
+        battleship.print_board()
+
+    print('Game Over')
+
+
+
+"""
+PLACE_SHIP Destroyer right A1
+PLACE_SHIP Carrier down B2
+PLACE_SHIP Battleship down J4
+PLACE_SHIP Submarine right E6
+PLACE_SHIP Cruiser right H10
+
+FIRE A4
+FIRE B7
+FIRE B3
+FIRE H5
+
+"""
