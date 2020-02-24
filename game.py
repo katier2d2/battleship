@@ -1,128 +1,94 @@
-import random
-from ship import Ship
-
-class Game:
-
-    def __init__(self, board):
-        self.board = board
-        self.store_ship = {}
-
-        self.ship = Ship()
-
-    def put_ship(self, specs):
-        name = specs[0]
-        dir = specs[1]
-        row = int(specs[2][-1])
-        col = get_index(specs[2][0])
-
-        for i, x in enumerate(self.board):
-            for j, a in enumerate(x):
-                if dir == 'right':
-                    if i == row and (j in range(col, col + self.ship.specs(name))):
-                        if self.check_placement(i, j) is False:
-                            self.board[i][j] = self.ship.id(name)
-                            # store_ship = ship_store(self.name, i, j)
-                        else:
-                            raise ValueError('invalid placement')
-                elif dir == 'down':
-                    if j == col and (i in range(row, row + self.ship.specs(name))):
-                        if self.check_placement(i, j) is False:
-                            self.board[i][j] = self.ship.id(name)
-                        else:
-                            raise ValueError('invalid placement')
-
-        print('Placed {}'.format(name))
-
-    def update_board(self, row, col, outcome):
-
-        self.board[row][col] = outcome
+import string
 
 
-    def fire(self, location):
+class Run():
 
-        row = int(location[-1])
-        col = get_index(location[0])
+    def __init__(self):
 
-        ship_id = self.check_placement(row, col)
+        self.board = self.make_board()
+        self.carrier = 5
+        self.battleship = 4
+        self.cruiser = 4
+        self.submarine = 3
+        self.destroyer = 2
+        self.targets = []
+        game_on = True
 
-        if isinstance(ship_id, int):
-            if ship_id == 0:
-                self.update_board(row, col, 'M')
-                print('Miss!')
-            else:
-                print('Hit!')
-                self.ship.hit(ship_id)
-                self.update_board(row, col, 'H')
+        print("Fire bombs by inputting row, col location (A2)")
 
-    def check_placement(self, row, col):
-        if self.board[row][col] == 0:
-            return False
-        return self.board[row][col]
+        while game_on:
+            fire_input = input("FIRE: ")
+            fire = list(fire_input)
 
-    def print_board(self):
-        for row in self.board:
-            for col in row:
-                print '{}'.format(col),
-            print '\n',
+            if not len(fire) == 2:
+                print("Invalid, incorrect input length, need char followed by number")
+                continue
+            if not isinstance(fire[0], str):
+                print("Invalid, first item must be string")
+                continue
+            if not fire[1].isdigit():
+                print("Invalid, second item must be integer")
+                continue
+            if fire_input in self.targets:
+                print("Invalid, shot already taken")
+                continue
 
+            self.shoot_bomb(fire[0].lower(), int(fire[1]))
 
-def get_index(col):
-    col_index = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
-    return col_index.index(col.lower())
+            if self.carrier == 0 and self.battleship == 0 and self.cruiser == 0 and self.submarine == 0 and self.destroyer == 0:
+                game_on = False
 
-def get_letter(num):
-    col_index = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
-    return col_index[num]
+        print("Game Over finally")
 
-if __name__ == '__main__':
+    def shoot_bomb(self, col, row):
+        col_index = string.ascii_lowercase.index(col)
+        self.targets.append(col + str(row))
 
-    game_on = True
+        target = self.board[row][col_index]
 
-    board = []
-    for i in range(0, 10):
-        board.append([0 for x in range(0, 10)])
-
-
-    battleship = Game(board)
-
-    print('PLACE SHIPS')
-
-    # for i in range(0, 5):
-    #     place_ship_input = raw_input('')  # PLACE_SHIP Destroyer right A1
-
-    list_of_commands = [
-        'PLACE_SHIP Destroyer right A1',
-        'PLACE_SHIP Carrier down B2',
-        'PLACE_SHIP Battleship down J4',
-        'PLACE_SHIP Submarine right E6',
-        'PLACE_SHIP Cruiser right H10']
-
-    for place_ship_input in list_of_commands:
-        place_ship_input = place_ship_input.split(' ')
-
-        if place_ship_input.pop(0) == 'PLACE_SHIP':
-            battleship.put_ship(place_ship_input)
+        if target == 1:
+            self.carrier -= 1
+            print("HIT carrier! ", str(self.carrier))
+            self.check_sunk(self.carrier)
+        elif target == 2:
+            self.battleship -= 1
+            print("HIT battleship! ", str(self.battleship))
+            self.check_sunk(self.battleship)
+        elif target == 3:
+            self.cruiser -= 1
+            print("HIT cruiser! ", str(self.cruiser))
+            self.check_sunk(self.cruiser)
+        elif target == 4:
+            self.submarine -= 1
+            print("HIT submarine! ", str(self.submarine))
+            self.check_sunk(self.submarine)
+        elif target == 5:
+            self.destroyer -= 1
+            print("HIT destroyer! ", str(self.destroyer))
+            self.check_sunk(self.destroyer)
         else:
-            raise ValueError('invalid command, must start with "PLACE_SHIP"')
+            print("MISS ", str(self.targets))
 
-    battleship.print_board()
+    def check_sunk(self, ship):
+        if ship == 0:
+            print("SUNK!")
 
+    @staticmethod
+    def make_board():
 
-    # FIRE A4
-    print('\nFIRE ON SHIPS')
+        print('assembling board...')
+        return [
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 2, 0, 0, 0],
+            [3, 3, 3, 3, 1, 0, 2, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 2, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 2, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 4, 4, 4, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 5, 5, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ]
 
-    while len(battleship.ship.ship_id) > 0:
-        # fire_loc = raw_input('')
-        fire_loc = 'FIRE {}{}'.format(get_letter(random.randint(0,9)).upper(),random.randint(0,9))
-        print fire_loc
-
-        fire_loc = fire_loc.split(' ')
-
-        if fire_loc.pop(0) == 'FIRE':
-            battleship.fire(fire_loc[0])
-        else:
-            raise ValueError('invalid command, must start with "FIRE"')
-
-    battleship.print_board()
-
-    print('Game Over')
+if __name__ == "__main__":
+    Run()
